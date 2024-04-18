@@ -2,19 +2,19 @@ import curses
 
 def game_loop(window):
     curses.curs_set(0)
-    player = [10, 15]
+    snake = [[10, 15], [10, 14], [10, 13]]
     current_direction = curses.KEY_RIGHT
 
     while True:
         draw_screen(window=window)
-        draw_character(character=player, window=window)
+        draw_snake(snake=snake, window=window)
         direction = get_new_direction(window=window, timeout=100)
         if direction is None:
             direction = current_direction
-        move_character(character=player, direction=direction)
+        move_snake(snake=snake, direction=direction)
         current_direction = direction
                
-        if character_hit_border(character=player, window=window):
+        if snake_hit_border(snake=snake, window=window):
             return
 
 
@@ -25,6 +25,11 @@ def get_new_direction(window, timeout):
         return direction
     return None
 
+def move_snake(snake, direction):
+    head = snake[0].copy()
+    snake.insert(0, head)
+    move_character(character=head, direction=direction)
+    snake.pop()
 
 def move_character(character, direction):
     match direction:
@@ -37,6 +42,9 @@ def move_character(character, direction):
         case curses.KEY_RIGHT:
             character[1] += 1
 
+def snake_hit_border(snake, window):
+    head = snake[0]
+    return character_hit_border(character=head, window=window)
 
 def character_hit_border(character, window):
     height, width = window.getmaxyx()
@@ -52,8 +60,15 @@ def draw_screen(window):
     window.clear()
     window.border(0)
 
-def draw_character(character, window):
-    window.addch(character[0], character[1], 'O')
+def draw_snake(snake, window):
+    head = snake[0]
+    body = snake[1:]
+    draw_character(character=head, window=window, char="@")
+    for body_part in body:
+        draw_character(character=body_part, window=window, char="s")
+
+def draw_character(character, window, char):
+    window.addch(character[0], character[1], char)
 
 if __name__ == '__main__':
     curses.wrapper(game_loop)
