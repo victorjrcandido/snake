@@ -1,15 +1,24 @@
 import curses
 
 def game_loop(window):
-    window.addstr(f'Aperte uma tecla')
+    character = [10, 15]
+    window.addch(character[0], character[1], 'O')
     while True:
         window.timeout(1000)
         char = window.getch()
         window.clear()
-        if char != -1:
-            window.addstr(f'Tecla Pressionada: {char}')
-        else:
-            window.addstr(f'Nenhuma tecla pressionada')
+        match char:
+            case curses.KEY_UP:
+                character[0] -= 1
+            case curses.KEY_DOWN:
+                character[0] += 1
+            case curses.KEY_LEFT:
+                character[1] -= 1
+            case curses.KEY_RIGHT:
+                character[1] += 1
+            case _:
+                pass
+        window.addch(character[0], character[1], 'O')       
 
 
 if __name__ == '__main__':
