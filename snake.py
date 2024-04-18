@@ -3,13 +3,17 @@ import curses
 def game_loop(window):
     curses.curs_set(0)
     player = [10, 15]
+    current_direction = curses.KEY_RIGHT
 
     while True:
         draw_screen(window=window)
         draw_character(character=player, window=window)
-        direction = get_new_direction(window=window, timeout=1000)
-        if direction is not None:
-            move_character(character=player, direction=direction)
+        direction = get_new_direction(window=window, timeout=100)
+        if direction is None:
+            direction = current_direction
+        move_character(character=player, direction=direction)
+        current_direction = direction
+               
         if character_hit_border(character=player, window=window):
             return
 
