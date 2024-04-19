@@ -1,22 +1,41 @@
 import curses
+import random
 
 def game_loop(window):
     curses.curs_set(0)
-    snake = [[10, 15], [10, 14], [10, 13]]
+    snake = [[10, 15], [10, 14], [10, 13], [10, 12]]
     current_direction = curses.KEY_RIGHT
+    fruit = get_new_fruit(window=window)
 
     while True:
         draw_screen(window=window)
         draw_snake(snake=snake, window=window)
+        draw_fruit(fruit=fruit, window=window)
         direction = get_new_direction(window=window, timeout=100)
+
         if direction is None:
             direction = current_direction
         move_snake(snake=snake, direction=direction)
-        current_direction = direction
-               
+        current_direction = direction       
         if snake_hit_border(snake=snake, window=window):
+            return    
+        if snake_hit_fruit(snake=snake, fruit=fruit):
+            fruit = get_new_fruit(window=window)
+            grow_snake(snake=snake)
+        if snake_hit_self(snake=snake):
             return
+        
+def snake_hit_self(snake):
+    head = snake[0]
+    return head in snake[1:]
 
+def grow_snake(snake):
+    head = snake[0].copy()
+    snake.insert(0, head)
+
+def get_new_fruit(window):
+    height, width = window.getmaxyx()
+    return [random.randint(1, height-2), random.randint(1, width-2)]
 
 def get_new_direction(window, timeout):
     window.timeout(timeout)
@@ -46,6 +65,9 @@ def snake_hit_border(snake, window):
     head = snake[0]
     return character_hit_border(character=head, window=window)
 
+def snake_hit_fruit(snake, fruit):
+    return fruit in snake
+    
 def character_hit_border(character, window):
     height, width = window.getmaxyx()
     # EIXO VERTICAL
@@ -66,6 +88,9 @@ def draw_snake(snake, window):
     draw_character(character=head, window=window, char="@")
     for body_part in body:
         draw_character(character=body_part, window=window, char="s")
+
+def draw_fruit(fruit ,window):
+    draw_character(character=fruit, window=window, char="#")        
 
 def draw_character(character, window, char):
     window.addch(character[0], character[1], char)
