@@ -27,11 +27,13 @@ def game_loop(window):
         
 def snake_hit_self(snake):
     head = snake[0]
-    return head in snake[1:]
+    body = snake[1:]
+    if head in body:
+        return True
 
 def grow_snake(snake):
-    head = snake[0].copy()
-    snake.insert(0, head)
+    tail = snake[-1].copy()
+    snake.append(tail)
 
 def get_new_fruit(window):
     height, width = window.getmaxyx()
