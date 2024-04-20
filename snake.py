@@ -1,29 +1,54 @@
 import curses
 import random
+import time
+
+dificulty = int(input("Enter dificulty - 1 - easy, 2 - medium, 3 - hard: "))
 
 def game_loop(window):
     curses.curs_set(0)
     snake = [[10, 15], [10, 14], [10, 13], [10, 12]]
     current_direction = curses.KEY_RIGHT
     fruit = get_new_fruit(window=window)
+    playing = True
+    score = 0
 
-    while True:
+    while playing:
         draw_screen(window=window)
         draw_snake(snake=snake, window=window)
         draw_fruit(fruit=fruit, window=window)
-        direction = get_new_direction(window=window, timeout=100)
+        match dificulty:
+            case 1:
+                direction = get_new_direction(window=window, timeout=1000)
+            case 2:
+                direction = get_new_direction(window=window, timeout=40)
+            case 3:
+                direction = get_new_direction(window=window, timeout=5)
 
         if direction is None:
+            direction = current_direction
+        elif direction_is_opposite(direction=direction, current_direction=current_direction):
             direction = current_direction
         move_snake(snake=snake, direction=direction)
         current_direction = direction       
         if snake_hit_border(snake=snake, window=window):
-            return    
+            break 
         if snake_hit_fruit(snake=snake, fruit=fruit):
             fruit = get_new_fruit(window=window)
+            score += 10
             grow_snake(snake=snake)
         if snake_hit_self(snake=snake):
-            return
+            break
+            
+    game_over(window=window, score=score)
+
+def game_over(window, score):
+    draw_screen(window=window)
+    s = f'Game over! Score {score}!'
+    x = 1
+    y = 1
+    window.addstr(y, x, s)
+    window.refresh()
+    time.sleep(2)
         
 def snake_hit_self(snake):
     head = snake[0]
@@ -45,6 +70,17 @@ def get_new_direction(window, timeout):
     if direction in [curses.KEY_UP, curses.KEY_LEFT, curses.KEY_DOWN, curses.KEY_RIGHT]:
         return direction
     return None
+
+def direction_is_opposite(direction, current_direction):
+    match direction:
+        case curses.KEY_UP:
+            return current_direction == curses.KEY_DOWN
+        case curses.KEY_LEFT:
+            return current_direction == curses.KEY_RIGHT
+        case curses.KEY_DOWN:
+            return current_direction == curses.KEY_UP
+        case curses.KEY_RIGHT:
+            return current_direction == curses.KEY_LEFT
 
 def move_snake(snake, direction):
     head = snake[0].copy()
